@@ -34,7 +34,6 @@ module.exports = assign({}, baseConfig, {
   devtool: 'hidden-source-map',
   output: {
     path: path.join(__dirname, buildpath),
-    filename: '[hash].js',
     publicPath: '/'
   }
 });
