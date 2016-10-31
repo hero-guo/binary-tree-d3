@@ -15,17 +15,9 @@ import {
 const treeData = {};
 const valueField = 'Federal';
 const valueFields = ['Federal', 'State', 'Local'];
-const rect = document.body.getBoundingClientRect();
-const screenWidth = (rect.width < 960) ?
-  Math.round(rect.width * 0.95) : Math.round((rect.width - 210) * 0.95);
-const screenHeight = 750;
 const tree = vizWeightedtree(document.getElementById('wrapper'));
 //set theme
 treeTheme(tree).skin(theme.WEIGHTED_TREE_AXIIS);
-// Set the size of our container element.
-d3.selectAll('wrapper')
-  .style('width', `${screenWidth}px`)
-  .style('height', `${screenHeight}px`);
 
 function prepData(csv) {
   const values = [];
@@ -53,7 +45,23 @@ function prepData(csv) {
   data.aggregateNest(nest, valueFields, function (a, b) {
     return Number(a) + Number(b);
   });
-
+  //Remove empty child nodes left at end of aggregation and add unqiue ids
+  function removeEmptyNodes(n, parentId, childId) {
+    const node = n;
+    if (!node) return;
+    node.id = `${parentId}_${childId}`;
+    if (node.values) {
+      for (let i = node.values.length - 1; i >= 0; i -= 1) {
+        node.id = `${parentId}_${i}`;
+        if (!node.values[i].key && !node.values[i].Level4) {
+          node.values.splice(i, 1);
+        } else {
+          removeEmptyNodes(node.values[i], node.id, i);
+        }
+      }
+    }
+  }
+  removeEmptyNodes({values: nest}, '0', '0');
   return nest;
 }
 function trimLabel(label) {
@@ -70,6 +78,7 @@ function initialize() {
       return d.values;
     })
     .key(function (d) {
+      console.log(d);
       return d.id;
     })
     .value(function (d) {
@@ -79,15 +88,16 @@ function initialize() {
     .label(function (d) {
       return trimLabel(d.key || (d[`Level${d.depth}`]));
     })
-    // .on('measure', onMeasure)
+    .on('measure', () => {
+      tree.tree().nodeSize([100, 0]);
+    })
     // .on('mouseover', onMouseOver)
     // .on('mouseout', onMouseOut)
     .on('click', onClick);
-  tree.width(1000).height(1000).update();
-  tree.toggleNode(tree.scope.data.values[2]);
-  tree.toggleNode(tree.scope.data.values[2].values[0]);
-  tree.toggleNode(tree.scope.data.values[3]);
-  window.sdata = tree.scope.data;
+  tree.width(404).height(750).update();
+  // tree.toggleNode(treeData.values[2]);
+  // tree.toggleNode(treeData.values[2].values[0]);
+  // tree.toggleNode(treeData.values[3]);
 }
 d3.csv('./demo/data/weightedtree_federal_budget.csv', function (csv) {
   treeData.values = prepData(csv);
