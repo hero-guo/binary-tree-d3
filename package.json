@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/hero-guo/binary-tree-d3#readme",
   "dependencies": {
-    "d3": "^4.2.8"
+    "d3": "^3.5.17"
   },
   "peerDependencies": {
     "d3": "^3.0.0 || ^4.2.8"

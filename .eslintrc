@@ -12,6 +12,8 @@
     "__DEVELOPMENT__": false
   },
   "rules": {
+    "no-debugger": 0,
+    "no-underscore-dangle": 0,
     "comma-dangle": [0, "never"],
     "spaced-comment": [0, "always"],
     "object-curly-spacing": [0, "never"],

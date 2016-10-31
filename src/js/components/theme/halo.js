@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import svg from '../svg/svg';
 
 const halo = function (v) {

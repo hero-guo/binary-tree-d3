@@ -5,7 +5,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var autoprefixer = require('autoprefixer');
 module.exports = {
-  entry: ['./src/js/index'],
+  entry: ['./src/js/demo'],
   output: {
     path: __dirname,
     filename: 'bundle.js',

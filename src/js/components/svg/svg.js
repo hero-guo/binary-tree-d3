@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import util from '../core/util';
 
 const svg = {
@@ -64,7 +65,8 @@ svg.gradient.blend = function (viz, color1, color2, direction) {
 };
 
 // Creates a color fade gradient to a given opacity in a given direction
-svg.gradient.fade = function (viz, color, direction, opacity = [0.75, 0.9], ratio = [0, 1]) {
+svg.gradient.fade = function (
+  viz, color, direction, opacity = [0.75, 0.9], ratio = [0, 1]) {
   const c = String(color).replace('#', '');
   const id = `vz_gradient_fade_${viz.id()}_${c}`;
   let x1;
@@ -105,7 +107,8 @@ svg.gradient.fade = function (viz, color, direction, opacity = [0.75, 0.9], rati
 };
 
 // Creates a radial fade gradient
-svg.gradient.radialFade = function (viz, color, opacity = [0.75, 0.9], ratio = [0, 1]) {
+svg.gradient.radialFade = function (
+  viz, color, opacity = [0.75, 0.9], ratio = [0, 1]) {
   const c = String(color).replace('#', '');
   const id = `vz_gradient_radial_fade${viz.id()}_${c}`;
   const defs = util.getDefs(viz);

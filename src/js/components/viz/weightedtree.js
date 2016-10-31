@@ -1,14 +1,14 @@
+import * as d3 from 'd3';
 import component from '../core/component';
 import util from '../core/util';
 
 const weightedTree = function (parent) {
-  const scope = {};
   const properties = {
     data: null,              // Expects a single numeric value
     margin: {                // Our marign object
       top: '5%',           // Top margin
       bottom: '5%',        // Bottom margin
-      left: '8%',          // Left margin
+      left: '8%',          // Left margintreeData
       right: '7%'          // Right margin
     },
     key: null,                //used to create unique node key
@@ -25,24 +25,26 @@ const weightedTree = function (parent) {
     }
   };
   //Create our viz and type it
-  const viz = component
-    .create(parent, scope, properties, ['node_refresh', 'data_prepped']);
+  const viz = component.create(
+    parent, {}, properties, ['node_refresh', 'data_prepped']
+  );
+  const scope = viz.scope;
   viz.type = 'viz.chart.weighted_tree';
   let dataIsDirty = true;
   let refreshNeeded = false;
-  viz.on('data_change.internal', function () {
+  component.on('data_change.internal', function () {
     dataIsDirty = true;
   });
   // const colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D',
   //   '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF',
   //   '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
-  let size;
-  const tree = scope.tree;                  // Tree layout
+  const size = util.size(scope.margin, scope.width, scope.height);
+  const tree = scope.tree;
   const nodeScale = d3.scale.sqrt();        // Scale used for node radius
   let root;
   let nodes;                         // Data storage for display tree
-  let depthSpan;
-  let maxDepth;
+  let maxDepth = 0;
+  let depthSpan = 0;
   const maxValues = {};
   const minValues = {};
   const diagonal = d3.svg.diagonal().projection(d => [d.y, d.x]);
@@ -55,10 +57,10 @@ const weightedTree = function (parent) {
   let g;
   let background;
   let plot;
-  // let plotBackground;
+  let plotBackground = [];
+  let defs = [];
   let linkPlot;
   let nodePlot;
-  // let defs;
 
   function initialize() {
     scope.selection.attr('class', 'vz-weighted_tree-viz');
@@ -66,7 +68,7 @@ const weightedTree = function (parent) {
       .attr('id', scope.id)
       .style('overflow', 'visible')
       .attr('class', 'vizuly vz-weighted_tree-viz');
-    defs = util.getDefs(viz);
+    defs = util.getDefs(component);
     background = svg.append('rect').attr('class', 'vz-background');
     g = svg.append('g').attr('class', 'vz-weighted_tree-viz');
     plot = g.append('g')
@@ -79,21 +81,21 @@ const weightedTree = function (parent) {
     scope.dispatch.initialize();
   }
   initialize();
-  function refreshData() {
-    function setChildren(node) {
-      const $node = node;
-      if (scope.children(node)) {
-        if (!node.children) {
-          $node.children = scope.children(node);
-          $node.children.forEach(function (d) {
-            const $d = d;
-            $d.x0 = node.x;
-            $d.y0 = node.y;
-            setChildren($d);
-          });
-        }
+  function setChildren(n) {
+    const node = n;
+    if (scope.children(node)) {
+      if (!node._children) {
+        node.children = scope.children(node);
+        node.children.forEach(function (d) {
+          const $d = d;
+          $d.x0 = node.x;
+          $d.y0 = node.y;
+          setChildren($d);
+        });
       }
     }
+  }
+  function refreshData() {
     maxDepth = 0;
     setChildren(scope.data);
     root = scope.data;
@@ -112,7 +114,6 @@ const weightedTree = function (parent) {
   }
   function measure() {
     viz.validate();
-    size = util.size(scope.margin, scope.width, scope.height);
     tree.size([size.height, size.width]);
     if (dataIsDirty === true || refreshNeeded) {
       refreshData();
@@ -120,9 +121,9 @@ const weightedTree = function (parent) {
       if (dataIsDirty === true) {
         fn = function (d) {
           const $d = d;
-          if (d.children) {
-            $d.children = d.children;
-            $d.children.forEach(fn);
+          if ($d.children) {
+            $d._children = $d.children;
+            $d._children.forEach(fn);
             $d.children = null;
           }
         };
@@ -135,7 +136,6 @@ const weightedTree = function (parent) {
     let scale;
     if (scope.branchPadding === -1) {
       scale = Math.min(size.height, size.width) / scope.children(scope.data).length;
-      console.log(`scale${scale}`);
     } else {
       scale = Math.min(size.height, size.width) * scope.branchPadding;
     }
@@ -180,8 +180,8 @@ const weightedTree = function (parent) {
       });
   }
   function updateNode(rootNode) {
-    const $nodes = tree(root).reverse();
-    const links = tree.links($nodes);
+    nodes = tree(rootNode).reverse();
+    const links = tree.links(nodes);
     function positionNodes(rn, ns) {
       const minY = d3.min(ns, d => d.x);
       const maxY = d3.max(ns, d => d.x);
@@ -189,29 +189,29 @@ const weightedTree = function (parent) {
       let h = Math.max(scope.height, (maxY - minY) + size.top);
       const w = Math.max(scope.width, maxX + (scope.width * 0.2) + size.left);
       if ((size.height / 2) + maxY > h) {
-        h = (size.height / 2) + maxY + tree.nodeSize()[0];
+        h = (size.height / 2) + maxY + 100;
       }
       svg.transition().duration(scope.duration)
         .style('height', `${h}px`)
         .style('width', `${w}px`);
       const offsetY = Math
-          .max(0, -minY - (size.height / 2)) + (tree.nodeSize()[0] / 2);
-      nodes.forEach(function (d) {
+          .max(0, -minY - (size.height / 2)) + (100 / 2);
+      ns.forEach(function (d) {
         const $d = d;
         // if (tree.nodeSize()) d.x= d.x + size.height/2;
         $d.y = d.depth * depthSpan;
         //Adjust y position to accomodate offset
-        $d.x = (d.x + offsetY) - tree.nodeSize()[0];
+        $d.x = (d.x + offsetY) - 100;
       });
       //Scroll to position of the rootNode node.
       scrollTop(rn.x);
     }
-    positionNodes(rootNode, $nodes);
+    positionNodes(rootNode, nodes);
     // Update the nodes…
     const node = nodePlot.selectAll('.vz-weighted_tree-node')
       .data(nodes, function (d) {
         const $d = d;
-        return d.vz_tree_id || ($d.vz_tree_id = scope.key(d));
+        return $d.vz_tree_id || ($d.vz_tree_id = scope.key($d));
       });
     // Enter any new nodes at the parent's previous position.
     const nodeEnter = node.enter().append('g')
@@ -219,8 +219,8 @@ const weightedTree = function (parent) {
         return `vz-weighted_tree-node vz-id-${d.vz_tree_id}`;
       })
       .attr('transform', function (d) {
-        const y = d.y0 ? d.y0 : rootNode.y0;
-        const x = d.x0 ? d.x0 : rootNode.x0;
+        const y = d.y0 ? d.y0 : rootNode.y0 || 0;
+        const x = d.x0 ? d.x0 : rootNode.x0 || 0;
         return `translate(${y}, ${x})`;
       })
       .on('click', function (d, i) {
@@ -322,8 +322,8 @@ const weightedTree = function (parent) {
     // Stash the old positions for transition.
     nodes.forEach(function (d) {
       const $d = d;
-      $d.x0 = a.x;
-      $d.y0 = a.y;
+      $d.x0 = d.x;
+      $d.y0 = d.y;
     });
   }
   function update() {
@@ -340,16 +340,15 @@ const weightedTree = function (parent) {
   }
   function toggleNode(d) {
     const $d = d;
-    if (d.children) {
-      $d.$children = d.children;
+    if ($d.children) {
+      $d._children = $d.children;
       $d.children = null;
     } else {
-      $d.children = d.$children;
-      $d.$children = null;
+      $d.children = $d._children;
+      $d._children = null;
     }
     updateNode($d);
   }
-
   viz.update = function (refresh) {
     if (refresh === true) refreshNeeded = true;
     update();
@@ -358,8 +357,9 @@ const weightedTree = function (parent) {
   viz.toggleNode = function (d) {
     toggleNode(d);
   };
+  viz.plotBackground = plotBackground;
+  viz.defs = defs;
   // Returns our glorious viz component :)
   return viz;
 };
-
 export default weightedTree;

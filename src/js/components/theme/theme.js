@@ -1,9 +1,3 @@
-// All paths except vizuly/core get their own namespace as denoted by the _path.js file
-import weightedTree from './weightedtree';
-
-const theme = {
-  weightedTree,
-};
 const config = {
   WEIGHTED_TREE_AXIIS: 'Axiis',
   COLUMNBAR_AXIIS: 'Axiis',
@@ -33,4 +27,4 @@ const config = {
   RADIAL_PROGRESS_BUSINESS: 'Business',
 };
 
-export {theme, config};
+export default config;

@@ -1,6 +1,6 @@
-import {config} from './theme';
+import config from './theme';
 
-const weightedTree = function (v) {
+const tree = function (v) {
   // This is the **viz** we will be styling.
   let viz = v;
   const fontSize = Math.max(8, Math.round(viz.width() / 75));
@@ -146,7 +146,6 @@ const weightedTree = function (v) {
     applyCallbacks();
   }
   theme();
-
   theme.apply = function (s) {
     if (arguments.length > 0) {
       theme.skin(s);
@@ -187,8 +186,8 @@ const weightedTree = function (v) {
   theme.skins = function () {
     return $skins;
   };
-
-  return {theme, skinDirty, dataDirty};
+  theme.skinDirty = skinDirty;
+  theme.dataDirty = dataDirty;
+  return theme;
 };
-
-export default weightedTree;
+export default tree;

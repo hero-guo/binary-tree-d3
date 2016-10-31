@@ -1,4 +1,6 @@
+import * as d3 from 'd3';
 import svg from '../svg/svg';
+import util from '../core/util';
 
 const scatter = function (v) {
   let viz = v;
@@ -54,7 +56,7 @@ const scatter = function (v) {
       node_fill(d, i) {
         return this.fill_colors[i % 5];
       },
-      node_fill_opacity(d, i) {
+      node_fill_opacity() {
         return 0.7;
       },
       class: 'vz-skin-sunset'
