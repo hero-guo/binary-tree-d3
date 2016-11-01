@@ -2,12 +2,16 @@
 import component from '../core/component';
 import util from '../core/util';
 
-const weightedTree = function (parent) {
+const weightedTree = function (parent, arr) {
+  /***
+   * parent父级ID
+   * arr自定义事件
+   ***/
   const wrap = document.getElementById('wrapper').getBoundingClientRect();
   const properties = {
     data: null,              // Expects a single numeric value
     margin: {                // Our marign object
-      top: '5%',           // Top margin
+      top: '10%',           // Top margin
       bottom: '5%',        // Bottom margin
       left: '50%',          // Left margintreeData
       right: '8%'          // Right margin
@@ -27,7 +31,7 @@ const weightedTree = function (parent) {
   };
   //Create our viz and type it
   const viz = component.create(
-    parent, {}, properties, ['node_refresh', 'data_prepped']
+    parent, {}, properties, ['node_refresh', 'data_prepped'].concat(arr)
   );
   const scope = viz.scope;
   viz.type = 'viz.chart.weighted_tree';
@@ -75,7 +79,6 @@ const weightedTree = function (parent) {
     scope.selection.attr('class', 'vz-weighted_tree-viz');
     svg = scope.selection.append('svg')
       .attr('id', scope.id)
-      .style('overflow', 'visible')
       .call(zoomListener)
       .call(dragListener)
       .attr('class', 'vizuly vz-weighted_tree-viz');
@@ -88,7 +91,7 @@ const weightedTree = function (parent) {
     plotBackground = plot.append('rect').attr('class', 'vz-plot-background');
     linkPlot = plot.append('g').attr('class', 'vz-weighted_tree-link-plot');
     nodePlot = plot.append('g').attr('class', 'vz-weighted_tree-node-plot');
-    // Tell everyone we are done initializing
+    viz.svg = {svg, g};
     scope.dispatch.initialize();
   }
   function setChildren(n) {
@@ -124,7 +127,6 @@ const weightedTree = function (parent) {
   }
   function measure() {
     viz.validate();
-    tree.size([size.height, size.width]);
     if (dataIsDirty === true || refreshNeeded) {
       refreshData();
       let fn;
@@ -150,7 +152,7 @@ const weightedTree = function (parent) {
       scale = Math.min(size.height, size.width) * scope.branchPadding;
     }
     nodeScale.range([1.5, scale / 2]);
-    tree.nodeSize([scale, 0]);
+    // tree.nodeSize([scale, 0]);
     depthSpan = (scope.fixedSpan > 0) ? scope.fixedSpan : size.width / (maxDepth + 1);
     //Set max/min values
     for (let i = 1; i < maxDepth + 1; i += 1) {
@@ -195,16 +197,7 @@ const weightedTree = function (parent) {
     const links = tree.links(nodes);
     function positionNodes(rn, ns) {
       const minY = d3.min(ns, d => d.y);
-      const maxY = d3.max(ns, d => d.x);
-      const maxX = d3.max(ns, d => d.depth) * depthSpan;
-      let h = Math.max(scope.height, (maxY - minY) + size.top);
-      const w = Math.max(scope.width, maxX + (scope.width * 0.2) + size.left);
-      if ((size.height / 2) + maxY > h) {
-        h = (size.height / 2) + maxY + 100;
-      }
-      svg.transition().duration(scope.duration)
-        .style('height', `${h}px`)
-        .style('width', `${w}px`);
+      svg.transition().duration(scope.duration);
       const offsetY = Math
           .max(0, -minY - (size.height / 2)) + (100 / 2);
       ns.forEach(function (d) {
@@ -254,10 +247,12 @@ const weightedTree = function (parent) {
         return d.children || d.children ? -10 : 10;
       })
       .attr('dy', '.35em')
+      .attr('transform', function () {
+        return 'rotate(45)';
+      })
       .attr('text-anchor', function (d) {
         return d.children || d.children ? 'end' : 'start';
       })
-      .style('pointer-events', 'none')
       .text(function (d) {
         return scope.label(d);
       });
@@ -354,22 +349,13 @@ const weightedTree = function (parent) {
       .style('width', size.width)
       .style('height', size.height)
       .attr(
-        'transform', `translate(${wrap.width / 2}, ${size.top + (size.height / 2)})`
+        'transform', `translate(${(wrap.width / 2) + 35}, ${size.top})`
       );
     updateNode(root);
     return viz;
   };
   viz.toggleNode = function (d) {
     toggleNode(d);
-  };
-  viz.zoom = function () {
-    g.attr(
-      'transform',
-      `translate(${d3.event.translate}) scale(${d3.event.scale})`
-    );
-  };
-  viz.drag = function () {
-    g.attr('transform', `translate(${d3.event.dx}, ${d3.event.dy})`);
   };
   viz.plotBackground = plotBackground;
   viz.defs = defs;

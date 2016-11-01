@@ -3,12 +3,10 @@
  */
 /*global document*/
 import '../css/index.styl';
-
 import {
-  data,
   vizWeightedtree,
   treeTheme,
-  theme
+  theme,
 } from './components';
 
 const treeData = {};
@@ -16,8 +14,60 @@ const valueField = 'Federal';
 const valueFields = ['Federal', 'State', 'Local'];
 const tree = vizWeightedtree(document.getElementById('wrapper'));
 //set theme
-treeTheme(tree).skin(theme.WEIGHTED_TREE_AXIIS);
-
+const settheme = treeTheme(tree);
+settheme.skin(theme.WEIGHTED_TREE_AXIIS);
+const aggregateNest = function (nest, aggProperties, aggregateFunction) {
+  let deepestChildNode = nest[0];
+  while (deepestChildNode.values) {
+    deepestChildNode = deepestChildNode.values[0];
+  }
+  const childProperties = [];
+  Object.getOwnPropertyNames(deepestChildNode).forEach((name) => {
+    childProperties.push(name);
+  });
+  function setSourceFields(child, parent) {
+    const $child = child;
+    const $parent = parent;
+    if (parent) {
+      for (let i = 0; i < childProperties.length; i += 1) {
+        const childProperty = childProperties[i];
+        if (child[childProperty] !== undefined) {
+          $child[`childProp_${childProperty}`] = child[childProperty];
+        }
+        $parent[`childProp_${childProperty}`] =
+          (child[`childProp_${childProperty}`]) ?
+            child[`childProp_${childProperty}`] : child[childProperty];
+      }
+    }
+  }
+  function aggregateNodes(nodes, parent) {
+    for (let y = 0; y < nodes.length; y += 1) {
+      const node = nodes[y];
+      if (node.values) {
+        aggregateNodes(node.values, node);
+        for (let z = 0; z < node.values.length; z += 1) {
+          const child = node.values[z];
+          for (let i = 0; i < aggProperties.length; i += 1) {
+            if (isNaN(node[`agg_${aggProperties[i]}`])) {
+              node[`agg_${aggProperties[i]}`] = 0;
+            }
+            node[`agg_${aggProperties[i]}`] = aggregateFunction(
+              node[`agg_${aggProperties[i]}`], child[`agg_${aggProperties[i]}`]);
+          }
+        }
+      } else {
+        for (let i = 0; i < aggProperties.length; i += 1) {
+          node[`agg_${aggProperties[i]}`] = Number(node[aggProperties[i]]);
+          if (isNaN(node[`agg_${aggProperties[i]}`])) {
+            node[`agg_${aggProperties[i]}`] = 0;
+          }
+        }
+      }
+      setSourceFields(node, parent);
+    }
+  }
+  aggregateNodes(nest);
+};
 function prepData(csv) {
   const values = [];
   csv.forEach(function (d) {
@@ -41,7 +91,7 @@ function prepData(csv) {
     })
     .entries(values);
   //This will be a viz.data function;
-  data.aggregateNest(nest, valueFields, function (a, b) {
+  aggregateNest(nest, valueFields, function (a, b) {
     return Number(a) + Number(b);
   });
   //Remove empty child nodes left at end of aggregation and add unqiue ids
@@ -66,13 +116,48 @@ function prepData(csv) {
 function trimLabel(label) {
   return (String(label).length > 20) ? `${String(label).substr(0, 17)}...` : label;
 }
-function initialize() {
-  function onClick(g, d) {
-    tree.toggleNode(d);
+function zoom() {
+  tree.svg.g.attr(
+    'transform',
+    `translate(${d3.event.translate}) scale(${d3.event.scale})`
+  );
+}
+function drag() {
+  tree.svg.g.attr('transform', `translate(${d3.event.dx}, ${d3.event.dy})`);
+}
+function everyParent(d) {
+  if (!d) return;
+  const selection = tree.selection();
+  selection.selectAll(`.vz-id-${d.vz_tree_id} circle`)
+    .style('fill-opacity', 0.9);
+  selection.selectAll(`path.vz-id-${d.vz_tree_id}`)
+    .style('stroke-opacity', 0.8);
+  selection.selectAll(`.vz-id-${d.vz_tree_id} text`)
+    .transition().style('font-size', settheme.fontSize * 1.25)
+    .style('font-weight', 'bold');
+  if (d.parent) {
+    everyParent(d.parent);
   }
+}
+function onMouseOver(e, d) {
+  everyParent(d);
+}
+function onMouseOut() {
+  const selection = tree.selection();
+  selection.selectAll('.vz-weighted_tree-node circle')
+    .style('fill', d => settheme.themeskin.node_fill(d))
+    .style('fill-opacity', d => settheme.themeskin.node_fill_opacity(d));
+  selection.selectAll('.vz-weighted_tree-node text')
+    .transition().style('font-size', settheme.fontSize)
+    .style('font-weight', 'normal');
+  selection.selectAll('.vz-weighted_tree-link')
+    .style('stroke-opacity', d => settheme.themeskin.link_stroke_opacity(d));
+}
+function onClick(g, d) {
+  tree.toggleNode(d);
+}
+function initialize() {
   tree.data(treeData)
-    .width(600)
-    .height(600)
     .children(function (d) {
       return d.values;
     })
@@ -89,12 +174,12 @@ function initialize() {
     .on('measure', () => {
       tree.tree().nodeSize([100, 0]);
     })
-    .on('zoom', tree.zoom)
-    .on('drag', tree.drag)
-    // .on('mouseover', onMouseOver)
-    // .on('mouseout', onMouseOut)
+    .on('zoom', zoom)
+    .on('drag', drag)
+    .on('mouseover', onMouseOver)
+    .on('mouseout', onMouseOut)
     .on('click', onClick);
-  tree.width(404).height(750).update();
+  tree.width('100%').height(1000).update();
   // tree.toggleNode(treeData.values[2]);
   // tree.toggleNode(treeData.values[2].values[0]);
   // tree.toggleNode(treeData.values[3]);

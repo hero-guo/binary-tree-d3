@@ -104,33 +104,9 @@ const tree = function (v) {
     skinDirty = false;
     dataDirty = false;
   }
-  function onMouseOver(e, d) {
-    const selection = viz.selection();
-    selection.selectAll(`.vz-id-${d.vz_tree_id} circle`)
-      .style('fill-opacity', 0.9);
-    selection.selectAll(`path.vz-id-${d.vz_tree_id}`)
-      .style('stroke-opacity', 0.8);
-    selection.selectAll(`.vz-id-${d.vz_tree_id} text`)
-      .transition().style('font-size', fontSize * 1.25)
-      .style('font-weight', 'bold');
-  }
-  function onMouseOut() {
-    const selection = viz.selection();
-    selection.selectAll('.vz-weighted_tree-node circle')
-      .style('fill', d => skin.node_fill(d))
-      .style('fill-opacity', d => skin.node_fill_opacity(d));
-    selection.selectAll('.vz-weighted_tree-node text')
-      .transition().style('font-size', fontSize)
-      .style('font-weight', 'normal');
-
-    selection.selectAll('.vz-weighted_tree-link')
-      .style('stroke-opacity', d => skin.link_stroke_opacity(d));
-  }
   const callbacks = [
     {on: 'update.theme', callback: applyTheme},
     {on: 'data_prepped.theme', callback: prepColorData},
-    {on: 'mouseover.theme', callback: onMouseOver},
-    {on: 'mouseout.theme', callback: onMouseOut}
   ];
   function applyCallbacks() {
     callbacks.forEach(function (d) {
@@ -188,6 +164,8 @@ const tree = function (v) {
   };
   theme.skinDirty = skinDirty;
   theme.dataDirty = dataDirty;
+  theme.fontSize = fontSize;
+  theme.themeskin = skin;
   return theme;
 };
 export default tree;
