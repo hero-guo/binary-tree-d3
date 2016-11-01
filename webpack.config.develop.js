@@ -10,6 +10,8 @@ baseConfig.plugins = [
   new webpack.NoErrorsPlugin(),
   new webpack.HotModuleReplacementPlugin()
 ].concat(baseConfig.plugins);
-module.exports = assign({}, baseConfig);
+module.exports = assign({}, baseConfig, {
+  devtool: 'source-map'
+});
 
 

@@ -78,7 +78,6 @@ function initialize() {
       return d.values;
     })
     .key(function (d) {
-      console.log(d);
       return d.id;
     })
     .value(function (d) {

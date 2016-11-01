@@ -3,19 +3,20 @@ import component from '../core/component';
 import util from '../core/util';
 
 const weightedTree = function (parent) {
+  const wrap = document.getElementById('wrapper').getBoundingClientRect();
   const properties = {
     data: null,              // Expects a single numeric value
     margin: {                // Our marign object
       top: '5%',           // Top margin
       bottom: '5%',        // Bottom margin
-      left: '8%',          // Left margintreeData
-      right: '7%'          // Right margin
+      left: '50%',          // Left margintreeData
+      right: '8%'          // Right margin
     },
     key: null,                //used to create unique node key
     tree: d3.layout.tree(),   //
     children: null,           // Used to determine child nodes
     duration: 500,            // This the time in ms used for any component generated transitions
-    width: 300,               // Overall width of component
+    width: 1000,               // Overall width of component
     height: 300,              // Height of component
     value: null,             // Radius value of the nodes and line weights;
     branchPadding: -1,
@@ -55,7 +56,7 @@ const weightedTree = function (parent) {
   let nodePlot;
   const maxValues = {};
   const minValues = {};
-  const diagonal = d3.svg.diagonal().projection(d => [d.y, d.x]);
+  const diagonal = d3.svg.diagonal().projection(d => [d.x, d.y]);
   const nodeRadius = function (node) {
     if (node.depth === 0) return nodeScale.range()[1] / 2;
     nodeScale.domain([minValues[node.depth], maxValues[node.depth]]);
@@ -178,11 +179,11 @@ const weightedTree = function (parent) {
       });
   }
   function updateNode(rootNode) {
-    nodes = tree(rootNode).reverse();
+    //rootNode 可以显示指定节点
+    nodes = tree(root).reverse();
     const links = tree.links(nodes);
-    console.log(rootNode, nodes);
     function positionNodes(rn, ns) {
-      const minY = d3.min(ns, d => d.x);
+      const minY = d3.min(ns, d => d.y);
       const maxY = d3.max(ns, d => d.x);
       const maxX = d3.max(ns, d => d.depth) * depthSpan;
       let h = Math.max(scope.height, (maxY - minY) + size.top);
@@ -220,7 +221,7 @@ const weightedTree = function (parent) {
       .attr('transform', function (d) {
         const y = d.y0 ? d.y0 : rootNode.y0 || 0;
         const x = d.x0 ? d.x0 : rootNode.x0 || 0;
-        return `translate(${y}, ${x})`;
+        return `translate(${x}, ${y})`;
       })
       .on('click', function (d, i) {
         scope.dispatch.click(this, d, i);
@@ -266,7 +267,7 @@ const weightedTree = function (parent) {
       .attr('d', function (d) {
         const y = d.target.y0 ? d.target.y0 : rootNode.y0;
         const x = d.target.x0 ? d.target.x0 : rootNode.x0;
-        const o = {x, y};
+        const o = {y, x};
         return diagonal({source: o, target: o});
       })
       .on('mouseover', function (d, i) {
@@ -284,7 +285,7 @@ const weightedTree = function (parent) {
     });
     nodeUpdate.duration(scope.duration)
       .attr('transform', function (d) {
-        return `translate(${d.y}, ${d.x})`;
+        return `translate(${d.x}, ${d.y})`;
       });
     nodeUpdate.select('circle')
       .attr('r', function (d) {
@@ -297,7 +298,7 @@ const weightedTree = function (parent) {
         const $d = d;
         $d.x0 = null;
         $d.y0 = null;
-        return `translate(${rootNode.y}, ${rootNode.x})`;
+        return `translate(${rootNode.x}, ${rootNode.y})`;
       })
       .remove();
     nodeExit.select('circle')
@@ -345,7 +346,7 @@ const weightedTree = function (parent) {
       .style('width', size.width)
       .style('height', size.height)
       .attr(
-        'transform', `translate(${size.left}, ${size.top + (size.height / 2)})`
+        'transform', `translate(${wrap.width / 2}, ${size.top + (size.height / 2)})`
       );
     updateNode(root);
     return viz;
