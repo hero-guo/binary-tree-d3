@@ -1,4 +1,3 @@
-import * as d3 from 'd3';
 import util from './util';
 
 const component = {};  //Consider moving to core/_core.js  to normalize
@@ -26,6 +25,7 @@ component.create = function (parent, scope, props, events) {
   args.push('zoom');
   args.push('zoomstart');
   args.push('zoomend');
+  args.push('drag');
 
   //Core events
   args.push('initialize');
@@ -44,10 +44,7 @@ component.create = function (parent, scope, props, events) {
       args.push(d);
     });
   }
-  // Sets up all of our dispatch calls by attaching a d3.dispatch to the scope variable
-  // For more info on dispatch, see here: https://github.com/mbostock/d3/wiki/Internals#d3_dispatch
   $scope.dispatch = d3.dispatch.apply(this, args);
-
   //For each property in our 'props' array create a callback if the property value has changed.
   const setProps = function (com, s, p) {
     const $s = s;
@@ -76,6 +73,7 @@ component.create = function (parent, scope, props, events) {
     return $scope.selection;
   };
   component.on = function (event, listener) {
+    console.log(event);
     $scope.dispatch.on(event, listener);
     return component;
   };

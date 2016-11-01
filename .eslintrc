@@ -9,6 +9,7 @@
     "experimentalObjectRestSpread": true
   },
   "globals": {
+    "d3": false,
     "__DEVELOPMENT__": false
   },
   "rules": {

@@ -1,4 +1,4 @@
-import * as d3 from 'd3';
+/*global document*/
 import component from '../core/component';
 import util from '../core/util';
 
@@ -36,9 +36,6 @@ const weightedTree = function (parent) {
   component.on('data_change.internal', function () {
     dataIsDirty = true;
   });
-  // const colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D',
-  //   '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF',
-  //   '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
   const size = util.size(scope.margin, scope.width, scope.height);
   const tree = scope.tree;
   const nodeScale = d3.scale.sqrt();        // Scale used for node radius
@@ -57,6 +54,18 @@ const weightedTree = function (parent) {
   const maxValues = {};
   const minValues = {};
   const diagonal = d3.svg.diagonal().projection(d => [d.x, d.y]);
+  const zoomListener = d3.behavior.zoom()
+    .scaleExtent([0.1, 3])
+    .on('zoom', () => {
+      scope.dispatch.zoom();
+    });
+  const dragListener = d3.behavior.drag()
+    .on('dragstart', function () {
+      d3.event.sourceEvent.stopPropagation();
+    })
+    .on('drag', function () {
+      scope.dispatch.drag();
+    });
   const nodeRadius = function (node) {
     if (node.depth === 0) return nodeScale.range()[1] / 2;
     nodeScale.domain([minValues[node.depth], maxValues[node.depth]]);
@@ -67,6 +76,8 @@ const weightedTree = function (parent) {
     svg = scope.selection.append('svg')
       .attr('id', scope.id)
       .style('overflow', 'visible')
+      .call(zoomListener)
+      .call(dragListener)
       .attr('class', 'vizuly vz-weighted_tree-viz');
     defs = util.getDefs(component);
     background = svg.append('rect').attr('class', 'vz-background');
@@ -226,9 +237,6 @@ const weightedTree = function (parent) {
       .on('click', function (d, i) {
         scope.dispatch.click(this, d, i);
       })
-      .on('dblclick', function (d, i) {
-        scope.dispatch.dblclick(this, d, i);
-      })
       .on('mouseover', function (d, i) {
         scope.dispatch.mouseover(this, d, i);
       })
@@ -340,7 +348,7 @@ const weightedTree = function (parent) {
   viz.update = function (refresh) {
     if (refresh === true) refreshNeeded = true;
     measure();
-    svg.attr('width', scope.width).attr('height', scope.height);
+    svg.attr('width', scope.width).attr('height', scope.height).call(zoomListener);
     background.attr('width', scope.width).attr('height', scope.height);
     plot
       .style('width', size.width)
@@ -353,6 +361,15 @@ const weightedTree = function (parent) {
   };
   viz.toggleNode = function (d) {
     toggleNode(d);
+  };
+  viz.zoom = function () {
+    g.attr(
+      'transform',
+      `translate(${d3.event.translate}) scale(${d3.event.scale})`
+    );
+  };
+  viz.drag = function () {
+    g.attr('transform', `translate(${d3.event.dx}, ${d3.event.dy})`);
   };
   viz.plotBackground = plotBackground;
   viz.defs = defs;

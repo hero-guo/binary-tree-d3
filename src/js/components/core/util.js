@@ -1,5 +1,3 @@
-import * as d3 from 'd3';
-
 const util = {};
 
 // This function converts margin absolute or relative (%) values with a specified width/height into

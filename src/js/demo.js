@@ -2,7 +2,6 @@
  * Created by guoguangyu on 2016/10/27.
  */
 /*global document*/
-import * as d3 from 'd3';
 import '../css/index.styl';
 
 import {
@@ -90,6 +89,8 @@ function initialize() {
     .on('measure', () => {
       tree.tree().nodeSize([100, 0]);
     })
+    .on('zoom', tree.zoom)
+    .on('drag', tree.drag)
     // .on('mouseover', onMouseOver)
     // .on('mouseout', onMouseOut)
     .on('click', onClick);

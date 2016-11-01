@@ -1,6 +1,8 @@
 /**
  * Created by guoguangyu on 2016/10/27.
  */
+import 'd3';
+
 export color from './core/color';
 export component from './core/component';
 export data from './core/data';

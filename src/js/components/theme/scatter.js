@@ -1,4 +1,3 @@
-import * as d3 from 'd3';
 import svg from '../svg/svg';
 import util from '../core/util';
 

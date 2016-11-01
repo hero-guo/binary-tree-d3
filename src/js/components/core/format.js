@@ -1,5 +1,3 @@
-import * as d3 from 'd3';
-
 const format = {};
 
 // Used for time series axis to format dates in following hierarchy
