@@ -1,8 +1,8 @@
 {
   "name": "binary-tree-d3",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Based on binary tree Vizuly and D3",
-  "main": "./src/js/index.js",
+  "main": "./lib/js/index.js",
   "scripts": {
     "start": "NODE_ENV=dev node server.js",
     "build": "npm i && webpack --config webpack.config.production.js --progress",
