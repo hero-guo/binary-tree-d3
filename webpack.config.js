@@ -5,7 +5,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var autoprefixer = require('autoprefixer');
 module.exports = {
-  entry: ['./src/js/demo'],
+  entry: ['./demo/tree/demo.js'],
   output: {
     path: __dirname,
     filename: 'bundle.js',
@@ -20,8 +20,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       title: 'binary',
-      template:'./src/index.tmpl',
-      inject: true
+      template:'./demo/tree/index.tmpl',
+      inject: true,
     }),
     new webpack.DefinePlugin({
       __DEVELOPMENT__: process.env.NODE_ENV === 'dev',
@@ -31,7 +31,6 @@ module.exports = {
     extensions: ['', '.js', '.styl'],
     root: [
       path.join(__dirname, '/src/js'),
-      path.join(__dirname, '/src/css'),
     ],
     modulesDirectories: [
       'node_modules'
@@ -42,14 +41,20 @@ module.exports = {
       {
         test: /\.jsx?$/,
         loaders: ['eslint'],
-        include: [path.join(__dirname, '/src/js'), path.join(__dirname, '/src')]
+        include: [
+          path.join(__dirname, '/src'),
+          path.join(__dirname, '/demo'),
+        ]
       }
     ],
     loaders: [
       {
         test: /\.jsx?$/,
         loaders: ['babel'],
-        include: [path.join(__dirname, '/src/js'), path.join(__dirname, '/src')]
+        include: [
+          path.join(__dirname, '/src'),
+          path.join(__dirname, '/demo')
+        ]
       }, {
         test: /\.less$/,
         loader: ExtractTextPlugin.extract(
@@ -82,7 +87,10 @@ module.exports = {
       }, {
         test: /\.json$/,
         loader: 'json-loader',
-        include: [path.join(__dirname, '/src/js'), path.join(__dirname, '/src')]
+        include: [
+          path.join(__dirname, '/src'),
+          path.join(__dirname, '/demo')
+        ]
       }
     ],
     postcss: [ autoprefixer({ browsers: ['last 2 versions'] }) ]

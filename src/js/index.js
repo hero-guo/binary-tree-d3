@@ -1,14 +1,10 @@
 /**
- * Created by guoguangyu on 2016/10/25.
-*/
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Router, Route, browserHistory } from 'react-router';
-import Main from './main';
+ * Created by guoguangyu on 2016/10/27.
+ */
+import 'd3';
 
-ReactDOM.render((
-  <Router history={browserHistory}>
-    <Route path="/" component={Main} />
-  </Router>),
-  document.querySelector('#wrapper')
-);
+export component from './core/component';
+export util from './core/util';
+export theme from './theme/theme';
+export treeTheme from './theme/default';
+export vizWeightedtree from './tree/weightedtree';

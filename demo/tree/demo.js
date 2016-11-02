@@ -7,7 +7,7 @@ import {
   vizWeightedtree,
   treeTheme,
   theme,
-} from './components';
+} from 'index';
 
 const treeData = {};
 const valueField = 'Federal';
