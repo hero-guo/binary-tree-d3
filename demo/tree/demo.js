@@ -12,7 +12,15 @@ import {
 const treeData = {};
 const valueField = 'Federal';
 const valueFields = ['Federal', 'State', 'Local'];
-const tree = vizWeightedtree(document.getElementById('wrapper'));
+const tree = vizWeightedtree(document.getElementById('wrapper'), [], {
+  margin: {
+    top: '10%',           // Top margin
+    bottom: '5%',        // Bottom margin
+    left: '50%',          // Left margintreeData
+    right: '8%',          // Right margin
+    rotate: 45          // Right margin
+  }
+});
 //set theme
 const settheme = treeTheme(tree);
 settheme.skin(theme.WEIGHTED_TREE_AXIIS);
@@ -157,6 +165,7 @@ function onClick(g, d) {
   tree.toggleNode(d);
 }
 function initialize() {
+  console.log(treeData);
   tree.data(treeData)
     .children(function (d) {
       return d.values;

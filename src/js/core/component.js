@@ -1,9 +1,15 @@
-import {uniq, concat} from 'lodash';
+import {uniq, concat, set} from 'lodash';
 import util from './util';
 
 const component = {};  //Consider moving to core/_core.js  to normalize
 
-component.create = function (parent, scope, props, events) {
+component.create = function (parent, scope, props, events, opt = {}) {
+  set(props, 'margin', {
+    ...props.margin,
+    ...opt.margin
+  });
+  console.log(opt, props);
+
   //We set the primary scope properties
   const $scope = scope;
   $scope.parent = parent;
@@ -67,7 +73,7 @@ component.create = function (parent, scope, props, events) {
       }
     });
     if (invalid.length > 0) {
-      throw new Error(`${util.component.validate()}:invalid.concat()need to be declared`);
+      throw new Error(`${component.validate()}:invalid.concat()need to be declared`);
     }
     $scope.dispatch.validate();
   };

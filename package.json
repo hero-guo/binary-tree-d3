@@ -1,6 +1,6 @@
 {
   "name": "binary-tree-d3",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Based on binary tree Vizuly and D3",
   "main": "./lib/js/index.js",
   "scripts": {

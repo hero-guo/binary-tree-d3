@@ -2,19 +2,20 @@
 import component from '../core/component';
 import util from '../core/util';
 
-const weightedTree = function (parent, arr) {
+const weightedTree = function (parent, arr, opt) {
   /***
    * parent父级ID
    * arr自定义事件
    ***/
-  const wrap = document.getElementById('wrapper').getBoundingClientRect();
+  const wrap = parent.getBoundingClientRect();
   const properties = {
     data: null,              // Expects a single numeric value
     margin: {                // Our marign object
       top: '10%',           // Top margin
       bottom: '5%',        // Bottom margin
       left: '50%',          // Left margintreeData
-      right: '8%'          // Right margin
+      right: '8%',          // Right margin
+      rotate: 45          // Right margin
     },
     key: null,                //used to create unique node key
     tree: d3.layout.tree(),   //
@@ -31,9 +32,10 @@ const weightedTree = function (parent, arr) {
   };
   //Create our viz and type it
   const viz = component.create(
-    parent, {}, properties, ['node_refresh', 'data_prepped'].concat(arr)
+    parent, {}, properties, ['node_refresh', 'data_prepped'].concat(arr), opt
   );
   const scope = viz.scope;
+  console.log(scope, scope.margin.rotate);
   viz.type = 'viz.chart.weighted_tree';
   let dataIsDirty = true;
   let refreshNeeded = false;
@@ -71,7 +73,7 @@ const weightedTree = function (parent, arr) {
       scope.dispatch.drag();
     });
   const nodeRadius = function (node) {
-    if (node.depth === 0) return nodeScale.range()[1] / 2;
+    if (node.depth === 0) return 10;
     nodeScale.domain([minValues[node.depth], maxValues[node.depth]]);
     return nodeScale(scope.value(node));
   };
@@ -83,7 +85,7 @@ const weightedTree = function (parent, arr) {
       .call(dragListener)
       .attr('class', 'vizuly vz-weighted_tree-viz');
     defs = util.getDefs(component);
-    background = svg.append('rect').attr('class', 'vz-background');
+    background = svg.append('rect').attr('class', 'vz-background').style('fill', 'none');
     g = svg.append('g').attr('class', 'vz-weighted_tree-viz');
     plot = g.append('g')
       .attr('class', 'vz-weighted_tree-plot')
@@ -248,7 +250,7 @@ const weightedTree = function (parent, arr) {
       })
       .attr('dy', '.35em')
       .attr('transform', function () {
-        return 'rotate(45)';
+        return `rotate(${scope.margin.rotate})`;
       })
       .attr('text-anchor', function (d) {
         return d.children || d.children ? 'end' : 'start';
@@ -264,6 +266,7 @@ const weightedTree = function (parent, arr) {
       });
     // Enter any new links at the parent's previous position.
     link.enter().append('path')
+      .style('fill', 'none')
       .attr('class', function (d) {
         return `vz-weighted_tree-link vz-id-${d.target.vz_tree_id}`;
       })
