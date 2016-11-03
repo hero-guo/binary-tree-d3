@@ -1,4 +1,5 @@
 /*global document*/
+import _ from 'lodash';
 import component from '../core/component';
 import util from '../core/util';
 
@@ -17,6 +18,7 @@ const weightedTree = function (parent, opt) {
       right: '8%',          // Right margin
       rotate: 45          // Right margin
     },
+    domain: 1,
     key: null,                //used to create unique node key
     tree: d3.layout.tree(),   //
     children: null,           // Used to determine child nodes
@@ -73,7 +75,13 @@ const weightedTree = function (parent, opt) {
     });
   const nodeRadius = function (node) {
     if (node.depth === 0) return 10;
-    nodeScale.domain([minValues[node.depth], maxValues[node.depth]]);
+    let domain = 1;
+    if (_.isFunction(scope.domain)) {
+      domain = scope.domain();
+    } else if (_.isNumber(scope.domain)) {
+      domain = scope.domain;
+    }
+    nodeScale.domain([minValues[node.depth], maxValues[node.depth] * domain]);
     return nodeScale(scope.value(node));
   };
   function initialize() {
@@ -153,7 +161,6 @@ const weightedTree = function (parent, opt) {
       scale = Math.min(size.height, size.width) * scope.branchPadding;
     }
     nodeScale.range([1.5, scale / 2]);
-    // tree.nodeSize([scale, 0]);
     depthSpan = (scope.fixedSpan > 0) ? scope.fixedSpan : size.width / (maxDepth + 1);
     //Set max/min values
     for (let i = 1; i < maxDepth + 1; i += 1) {

@@ -134,8 +134,8 @@ function initialize() {
         .label(function (d) {                                           // returns label for each node.
             return trimLabel(d.key || (d['Level' + d.depth]))})
         .on("measure",onMeasure)                                        // Make any measurement changes
-        // .on("mouseover",onMouseOver)                                    // mouseover callback - all viz components issue these events
-        // .on("mouseout",onMouseOut)                                      // mouseout callback - all viz components issue these events
+        .on("mouseover",onMouseOver)                                    // mouseover callback - all viz components issue these events
+        .on("mouseout",onMouseOut)                                      // mouseout callback - all viz components issue these events
         .on("click",onClick);                                           // mouseout callback - all viz components issue these events
 
 
@@ -171,7 +171,6 @@ var datatip='<div class="tooltip" style="width: 250px; background-opacity:.5">' 
 // This function uses the above html template to replace values and then creates a new <div> that it appends to the
 // document.body.  This is just one way you could implement a data tip.
 function createDataTip(x,y,h1,h2,h3) {
-
     var html = datatip.replace("HEADER1", h1);
     html = html.replace("HEADER2", h2);
     html = html.replace("HEADER3", h3);

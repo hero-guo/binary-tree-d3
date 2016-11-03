@@ -3,10 +3,7 @@
  */
 /*global document*/
 import '../css/index.styl';
-import {
-  d3Tree,
-  theme,
-} from 'index';
+import {d3Tree, theme} from '../../src/js';
 
 const treeData = {};
 const valueField = 'Federal';
@@ -146,11 +143,36 @@ function everyParent(d) {
     everyParent(d.parent);
   }
 }
+const datatip = '<div class="tooltip"' +
+  'style="width: 250px; background-opacity:.5">' +
+  '<div class="header1">HEADER1</div>' +
+  '<div class="header-rule"></div>' +
+  '<div class="header2"> HEADER2 </div>' +
+  '<div class="header-rule"></div>' +
+  '<div class="header3"> HEADER3 </div>' +
+  '</div>';
+function createDataTip(e, x, y, d) {
+  let html = datatip.replace('HEADER1', d.childProp_Level1);
+  html = html.replace('HEADER2', d.childProp_Level2);
+  html = html.replace('HEADER3', d.childProp_Level3);
+  e.append('div')
+    .attr('class', 'vz-weighted_tree-tip')
+    .style('position', 'absolute')
+    .style('top', `${y - 100}px`)
+    .style('left', `${(x) - 100}px`)
+    .style('opacity', 0)
+    .html(html)
+    .transition()
+    .style('opacity', 1);
+}
 function onMouseOver(e, d) {
+  const rect = e.getBoundingClientRect();
+  createDataTip(tree.selection(), rect.left, rect.top, d);
   everyParent(d);
 }
 function onMouseOut() {
   const selection = tree.selection();
+  selection.selectAll('.vz-weighted_tree-tip').remove();
   selection.selectAll('.vz-weighted_tree-node circle')
     .style('fill', d => themeskin.node_fill(d))
     .style('fill-opacity', d => themeskin.node_fill_opacity(d));
@@ -160,22 +182,25 @@ function onMouseOut() {
   selection.selectAll('.vz-weighted_tree-link')
     .style('stroke-opacity', d => themeskin.link_stroke_opacity(d));
 }
+
 function onClick(g, d) {
   tree.toggleNode(d);
 }
 function initialize() {
   tree.data(treeData)
     .children(function (d) {
-      return d.values;
+      return d.values; //子元素标识
     })
     .key(function (d) {
       return d.id;
     })
     .value(function (d) {
-      return Number(d[`agg_${valueField}`]);
+      return Number(d[`agg_${valueField}`]); //path宽度
     })
-    .fixedSpan(-1)
+    .fixedSpan(-1) //path 长度
+    .domain(1 || function () { return 100; }) //d3 domain 比例尺最大值倍数设置
     .label(function (d) {
+      //节点展示名称
       return trimLabel(d.key || (d[`Level${d.depth}`]));
     })
     .on('measure', () => {
