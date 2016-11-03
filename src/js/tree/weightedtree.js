@@ -19,6 +19,7 @@ const weightedTree = function (parent, opt) {
       rotate: 45          // Right margin
     },
     domain: 1,
+    rootColor: '#000',
     key: null,                //used to create unique node key
     tree: d3.layout.tree(),   //
     children: null,           // Used to determine child nodes
@@ -123,6 +124,7 @@ const weightedTree = function (parent, opt) {
     root = scope.data;
     root.x0 = 0;
     root.y0 = 0;
+    root.vz_link_color = scope.rootColor;
     nodes = tree.nodes(root).reverse();
     nodes.forEach(function (node) {
       if (node.depth === 0) return;

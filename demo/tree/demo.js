@@ -198,6 +198,7 @@ function initialize() {
       return Number(d[`agg_${valueField}`]); //path宽度
     })
     .fixedSpan(-1) //path 长度
+    .rootColor('#f0f097')
     .domain(1 || function () { return 100; }) //d3 domain 比例尺最大值倍数设置
     .label(function (d) {
       //节点展示名称
