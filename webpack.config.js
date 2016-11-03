@@ -39,7 +39,7 @@ module.exports = {
   module: {
     preLoaders: [
       {
-        test: /\.jsx?$/,
+        test: /\.js?$/,
         loaders: ['eslint'],
         include: [
           path.join(__dirname, '/src'),
@@ -49,7 +49,7 @@ module.exports = {
     ],
     loaders: [
       {
-        test: /\.jsx?$/,
+        test: /\.js?$/,
         loaders: ['babel'],
         include: [
           path.join(__dirname, '/src'),

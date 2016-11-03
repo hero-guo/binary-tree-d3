@@ -8,8 +8,6 @@ component.create = function (parent, scope, props, events, opt = {}) {
     ...props.margin,
     ...opt.margin
   });
-  console.log(opt, props);
-
   //We set the primary scope properties
   const $scope = scope;
   $scope.parent = parent;

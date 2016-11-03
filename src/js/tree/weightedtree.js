@@ -2,10 +2,10 @@
 import component from '../core/component';
 import util from '../core/util';
 
-const weightedTree = function (parent, arr, opt) {
+const weightedTree = function (parent, opt) {
   /***
    * parent父级ID
-   * arr自定义事件
+   * opt树状图margin配置
    ***/
   const wrap = parent.getBoundingClientRect();
   const properties = {
@@ -32,10 +32,9 @@ const weightedTree = function (parent, arr, opt) {
   };
   //Create our viz and type it
   const viz = component.create(
-    parent, {}, properties, ['node_refresh', 'data_prepped'].concat(arr), opt
+    parent, {}, properties, ['node_refresh', 'data_prepped'], opt
   );
   const scope = viz.scope;
-  console.log(scope, scope.margin.rotate);
   viz.type = 'viz.chart.weighted_tree';
   let dataIsDirty = true;
   let refreshNeeded = false;

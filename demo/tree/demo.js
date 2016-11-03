@@ -4,15 +4,14 @@
 /*global document*/
 import '../css/index.styl';
 import {
-  vizWeightedtree,
-  treeTheme,
+  d3Tree,
   theme,
 } from 'index';
 
 const treeData = {};
 const valueField = 'Federal';
 const valueFields = ['Federal', 'State', 'Local'];
-const tree = vizWeightedtree(document.getElementById('wrapper'), [], {
+const tree = d3Tree(document.getElementById('wrapper'), {
   margin: {
     top: '10%',           // Top margin
     bottom: '5%',        // Bottom margin
@@ -21,9 +20,9 @@ const tree = vizWeightedtree(document.getElementById('wrapper'), [], {
     rotate: 45          // Right margin
   }
 });
-//set theme
-const settheme = treeTheme(tree);
-settheme.skin(theme.WEIGHTED_TREE_AXIIS);
+const settheme = theme(tree).skin('Axiis');
+const themeskin = settheme.themeskin();
+
 const aggregateNest = function (nest, aggProperties, aggregateFunction) {
   let deepestChildNode = nest[0];
   while (deepestChildNode.values) {
@@ -153,19 +152,18 @@ function onMouseOver(e, d) {
 function onMouseOut() {
   const selection = tree.selection();
   selection.selectAll('.vz-weighted_tree-node circle')
-    .style('fill', d => settheme.themeskin.node_fill(d))
-    .style('fill-opacity', d => settheme.themeskin.node_fill_opacity(d));
+    .style('fill', d => themeskin.node_fill(d))
+    .style('fill-opacity', d => themeskin.node_fill_opacity(d));
   selection.selectAll('.vz-weighted_tree-node text')
     .transition().style('font-size', settheme.fontSize)
     .style('font-weight', 'normal');
   selection.selectAll('.vz-weighted_tree-link')
-    .style('stroke-opacity', d => settheme.themeskin.link_stroke_opacity(d));
+    .style('stroke-opacity', d => themeskin.link_stroke_opacity(d));
 }
 function onClick(g, d) {
   tree.toggleNode(d);
 }
 function initialize() {
-  console.log(treeData);
   tree.data(treeData)
     .children(function (d) {
       return d.values;
