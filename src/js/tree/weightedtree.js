@@ -78,7 +78,7 @@ const weightedTree = function (parent, opt) {
     if (node.depth === 0) return 10;
     let domain = 1;
     if (_.isFunction(scope.domain)) {
-      domain = scope.domain();
+      domain = scope.domain(node);
     } else if (_.isNumber(scope.domain)) {
       domain = scope.domain;
     }
@@ -283,12 +283,6 @@ const weightedTree = function (parent, opt) {
         const x = d.target.x0 ? d.target.x0 : rootNode.x0;
         const o = {y, x};
         return diagonal({source: o, target: o});
-      })
-      .on('mouseover', function (d, i) {
-        scope.dispatch.mouseover(this, d, i);
-      })
-      .on('mouseout', function (d, i) {
-        scope.dispatch.mouseout(this, d, i);
       })
       .style('stroke-linecap', 'round');
     scope.dispatch.update();
